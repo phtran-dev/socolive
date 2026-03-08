@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tproject>
+    <type>org.tizen.web.project.configuration.xml</type>
+    <profile name="tv-samsung"/>
+    <package type="wgt"/>
+</tproject>

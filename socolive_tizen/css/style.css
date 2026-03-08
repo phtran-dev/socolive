@@ -1,0 +1,435 @@
+/* Samsung TV Styles - 1920x1080 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #4CAF50;
+    --primary-dark: #388E3C;
+    --background: #0D1B2A;
+    --surface: #1B2838;
+    --surface-light: #2A3F5F;
+    --text: #FFFFFF;
+    --text-secondary: #B0BEC5;
+    --error: #F44336;
+    --focus-border: 4px solid #4CAF50;
+}
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 50px;
+    background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+    height: 120px;
+}
+
+.logo {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.date-selector {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-btn, .today-btn {
+    background: var(--surface-light);
+    border: none;
+    color: var(--text);
+    padding: 15px 30px;
+    font-size: 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn:focus, .today-btn:focus {
+    border: var(--focus-border);
+    background: var(--primary);
+    outline: none;
+}
+
+#currentDate {
+    font-size: 28px;
+    min-width: 300px;
+    text-align: center;
+}
+
+.status {
+    font-size: 20px;
+    color: var(--text-secondary);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px 50px;
+    overflow: hidden;
+}
+
+/* Match List */
+.match-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    height: 100%;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.match-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 30px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 4px solid transparent;
+}
+
+.match-card:focus {
+    border-color: var(--primary);
+    transform: scale(1.02);
+    outline: none;
+}
+
+.match-card:hover {
+    background: var(--surface-light);
+}
+
+.match-league {
+    background: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 18px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.match-teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+}
+
+.team-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--surface-light);
+    margin-bottom: 10px;
+    object-fit: contain;
+}
+
+.team-name {
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.vs {
+    font-size: 28px;
+    color: var(--text-secondary);
+}
+
+.match-time {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 15px;
+}
+
+.match-streamers {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    font-size: 18px;
+}
+
+/* Player Section */
+.player-section {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.player-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.back-btn {
+    background: var(--surface-light);
+    border: none;
+    color: var(--text);
+    padding: 15px 30px;
+    font-size: 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.back-btn:focus {
+    border: var(--focus-border);
+    background: var(--primary);
+    outline: none;
+}
+
+.match-info {
+    display: flex;
+    gap: 20px;
+    font-size: 24px;
+}
+
+.match-info span:first-child {
+    font-weight: bold;
+}
+
+.match-info span:last-child {
+    color: var(--text-secondary);
+}
+
+.video-container {
+    flex: 1;
+    position: relative;
+    background: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-player {
+    width: 100%;
+    height: 100%;
+    max-height: 700px;
+    object-fit: contain;
+    background: #000;
+    z-index: 1;
+}
+
+.player-overlay, .player-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--surface-light);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text, .error-text {
+    margin-top: 20px;
+    font-size: 24px;
+}
+
+.error-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+}
+
+.retry-btn {
+    margin-top: 30px;
+    background: var(--primary);
+    border: none;
+    color: white;
+    padding: 20px 40px;
+    font-size: 24px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.retry-btn:focus {
+    border: var(--focus-border);
+    outline: none;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 20px 0;
+}
+
+.control-btn {
+    background: var(--surface-light);
+    border: none;
+    color: var(--text);
+    padding: 15px 30px;
+    font-size: 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.control-btn:focus {
+    border: var(--focus-border);
+    background: var(--primary);
+    outline: none;
+}
+
+.control-btn.external-btn {
+    background: #FF9800;
+    font-weight: bold;
+}
+
+.control-btn.external-btn:focus {
+    background: #F57C00;
+}
+
+.stream-quality {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+    font-size: 20px;
+}
+
+.quality-btn {
+    background: var(--surface-light);
+    border: none;
+    color: var(--text);
+    padding: 12px 25px;
+    font-size: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.quality-btn:focus, .quality-btn.active {
+    border: var(--focus-border);
+    background: var(--primary);
+    outline: none;
+}
+
+/* Streamer List */
+.streamer-list {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--surface-light);
+}
+
+.streamer-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    margin: 8px 0;
+    background: var(--surface-light);
+    border-radius: 8px;
+    border: 3px solid transparent;
+    cursor: pointer;
+}
+
+.streamer-item:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.streamer-name {
+    font-size: 18px;
+}
+
+.watch-btn {
+    background: var(--primary);
+    border: none;
+    color: white;
+    padding: 8px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+/* Footer */
+.footer {
+    padding: 20px 50px;
+    background: var(--surface);
+    text-align: center;
+}
+
+.help-text {
+    color: var(--text-secondary);
+    font-size: 18px;
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+.loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-size: 28px;
+    color: var(--text-secondary);
+    padding: 100px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--surface-light);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}

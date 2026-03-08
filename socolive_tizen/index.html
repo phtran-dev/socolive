@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Socolive TV</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="$WEBAPIS/webapis/webapis.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">⚽ SOCOLIVE TV</div>
+            <div class="date-selector">
+                <button id="prevDay" class="nav-btn" data-focusable>◀</button>
+                <span id="currentDate">Loading...</span>
+                <button id="nextDay" class="nav-btn" data-focusable>▶</button>
+                <button id="todayBtn" class="today-btn" data-focusable>Today</button>
+            </div>
+            <div class="status" id="status">Ready</div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Match List -->
+            <section id="matchList" class="match-list">
+                <div class="loading" id="loading">Loading matches...</div>
+            </section>
+
+            <!-- Video Player (hidden by default) -->
+            <section id="playerSection" class="player-section hidden">
+                <div class="player-header">
+                    <button id="backBtn" class="back-btn" data-focusable>◀ Back to Matches</button>
+                    <div class="match-info">
+                        <span id="playerMatchTitle"></span>
+                        <span id="playerStreamer"></span>
+                    </div>
+                </div>
+                <div class="video-container">
+                    <video id="videoPlayer" class="video-player"></video>
+                    <div class="player-overlay" id="playerOverlay">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">Loading stream...</div>
+                    </div>
+                    <div class="player-error hidden" id="playerError">
+                        <div class="error-icon">⚠️</div>
+                        <div class="error-text" id="errorText">Failed to load stream</div>
+                        <button id="retryBtn" class="retry-btn" data-focusable>Retry</button>
+                    </div>
+                </div>
+                <div class="player-controls">
+                    <button id="playPauseBtn" class="control-btn" data-focusable>⏯ Play/Pause</button>
+                    <button id="stopBtn" class="control-btn" data-focusable>⏹ Stop</button>
+                    <button id="externalBtn" class="control-btn external-btn" data-focusable>📺 Open in MPV/VLC</button>
+                    <div class="stream-quality">
+                        <span>Quality:</span>
+                        <button id="hdBtn" class="quality-btn active" data-focusable>HD</button>
+                        <button id="sdBtn" class="quality-btn" data-focusable>SD</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="help-text">
+                Use ◀ ▲ ▼ ▶ to navigate | Enter to select | Return to go back
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

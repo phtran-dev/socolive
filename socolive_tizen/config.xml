@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets"
+        id="http://socolive.tv" version="1.0.0" viewmodes="maximized">
+    <access origin="*" subdomains="true"></access>
+    <tizen:application id="socoliveTV.app" package="socoliveTV" required_version="2.3"/>
+    <author href="http://socolive.tv" email="dev@socolive.tv">Socolive TV</author>
+    <content src="index.html"/>
+    <description>Sports Live Streaming for Samsung TV</description>
+    <feature name="http://tizen.org/feature/screen.size.all"/>
+    <icon src="images/icon.png"/>
+    <license href="https://opensource.org/licenses/MIT">MIT</license>
+    <name>SocoliveTV</name>
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
+    <tizen:profile name="tv-samsung"/>
+    <tizen:setting screen-orientation="landscape" context-menu="enable" event-handling="enable"
+                  background-support="disable" encryption="disable" install-location="auto"
+                  hwkey-event="enable"/>
+</widget>

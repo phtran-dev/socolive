@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+    <name>SocoliveTV</name>
+    <comment></comment>
+    <projects>
+    </projects>
+    <buildSpec>
+        <buildCommand>
+            <name>org.tizen.common.builder.WebResourceBuilder</name>
+            <arguments>
+            </arguments>
+        </buildCommand>
+    </buildSpec>
+    <natures>
+        <nature>org.tizen.web.project.WebNature</nature>
+    </natures>
+    <linkedResources>
+        <link>
+            <name>.sign</name>
+            <type>2</type>
+            <locationURI>$%7BPARENT-1-PROJECT_LOC%7D/.sign</locationURI>
+        </link>
+    </linkedResources>
+</projectDescription>
