@@ -12,11 +12,19 @@ class Anchor {
   });
 
   factory Anchor.fromJson(Map<String, dynamic> json) {
+    // roomNum can be in anchor.roomNum or directly as uid
+    String roomNum = '';
+    if (json['anchor'] != null && json['anchor']['roomNum'] != null) {
+      roomNum = json['anchor']['roomNum'].toString();
+    } else if (json['uid'] != null) {
+      roomNum = json['uid'].toString();
+    }
+
     return Anchor(
       uid: json['uid']?.toString() ?? '',
-      nickName: json['nickName'] ?? 'Unknown',
-      icon: json['icon'] ?? '',
-      roomNum: json['anchor']?['roomNum']?.toString() ?? json['uid']?.toString() ?? '',
+      nickName: json['nickName']?.toString() ?? 'Unknown',
+      icon: json['icon']?.toString() ?? '',
+      roomNum: roomNum,
     );
   }
 }
@@ -47,15 +55,15 @@ class Match {
   factory Match.fromJson(Map<String, dynamic> json) {
     return Match(
       scheduleId: json['scheduleId']?.toString() ?? '',
-      categoryName: json['categoryName'] ?? '',
-      subCategoryName: json['subCateName'] ?? '',
-      hostName: json['hostName'] ?? 'TBD',
-      guestName: json['guestName'] ?? 'TBD',
-      hostIcon: json['hostIcon'] ?? '',
-      guestIcon: json['guestIcon'] ?? '',
-      matchTime: json['matchTime'] ?? 0,
+      categoryName: json['categoryName']?.toString() ?? '',
+      subCategoryName: json['subCateName']?.toString() ?? '',
+      hostName: json['hostName']?.toString() ?? 'TBD',
+      guestName: json['guestName']?.toString() ?? 'TBD',
+      hostIcon: json['hostIcon']?.toString() ?? '',
+      guestIcon: json['guestIcon']?.toString() ?? '',
+      matchTime: json['matchTime'] is int ? json['matchTime'] : 0,
       anchors: (json['anchors'] as List<dynamic>?)
-              ?.map((a) => Anchor.fromJson(a))
+              ?.map((a) => Anchor.fromJson(a as Map<String, dynamic>))
               .toList() ??
           [],
     );

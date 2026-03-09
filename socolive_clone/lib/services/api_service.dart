@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/match.dart';
 import '../models/stream.dart';
@@ -8,14 +9,28 @@ class ApiService {
 
   final http.Client _client;
 
+  // Headers to mimic the original app
+  final Map<String, String> _headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': '*/*',
+    'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8',
+    'Referer': 'https://socolive-bongda.web.app/',
+  };
+
   ApiService({http.Client? client}) : _client = client ?? http.Client();
 
   /// Strip JSONP callback wrapper
   Map<String, dynamic> _parseJsonp(String response) {
-    // Handle: callback_name({...})
-    final match = RegExp(r'^\w+\((.*)\)$', dotAll: true).firstMatch(response);
-    final jsonStr = match != null ? match.group(1)! : response;
-    return json.decode(jsonStr);
+    try {
+      // Handle: callback_name({...})
+      final match = RegExp(r'^\w+\((.*)\)$', dotAll: true).firstMatch(response);
+      final jsonStr = match != null ? match.group(1)! : response;
+      return json.decode(jsonStr) as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('JSONP parse error: $e');
+      debugPrint('Response was: ${response.substring(0, response.length > 200 ? 200 : response.length)}');
+      rethrow;
+    }
   }
 
   /// Get matches for a specific date
@@ -23,8 +38,11 @@ class ApiService {
     final dateStr = '${date.year}${_pad(date.month)}${_pad(date.day)}';
     final url = Uri.parse('$baseUrl/match/matches_$dateStr.json');
 
+    debugPrint('Fetching: $url');
+
     try {
-      final response = await _client.get(url);
+      final response = await _client.get(url, headers: _headers);
+      debugPrint('Response status: ${response.statusCode}');
 
       if (response.statusCode != 200) {
         throw Exception('Failed to load matches: ${response.statusCode}');
@@ -36,9 +54,21 @@ class ApiService {
         throw Exception('API error: ${data['msg']}');
       }
 
-      final List<dynamic> matchesJson = data['data'] ?? [];
-      return matchesJson.map((json) => Match.fromJson(json)).toList();
+      final List<dynamic> matchesJson = data['data'] as List<dynamic>? ?? [];
+      debugPrint('Parsing ${matchesJson.length} matches');
+
+      final matches = <Match>[];
+      for (int i = 0; i < matchesJson.length; i++) {
+        try {
+          matches.add(Match.fromJson(matchesJson[i] as Map<String, dynamic>));
+        } catch (e) {
+          debugPrint('Error parsing match $i: $e');
+        }
+      }
+
+      return matches;
     } catch (e) {
+      debugPrint('getMatches error: $e');
       rethrow;
     }
   }
@@ -48,7 +78,7 @@ class ApiService {
     final url = Uri.parse('$baseUrl/room/$roomId/detail.json');
 
     try {
-      final response = await _client.get(url);
+      final response = await _client.get(url, headers: _headers);
 
       if (response.statusCode != 200) {
         throw Exception('Failed to load room: ${response.statusCode}');
@@ -60,8 +90,9 @@ class ApiService {
         throw Exception('API error: ${data['msg']}');
       }
 
-      return RoomDetail.fromJson(data['data']);
+      return RoomDetail.fromJson(data['data'] as Map<String, dynamic>);
     } catch (e) {
+      debugPrint('getRoomDetail error: $e');
       rethrow;
     }
   }

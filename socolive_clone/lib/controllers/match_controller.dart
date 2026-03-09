@@ -28,9 +28,13 @@ class MatchController extends ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint('Loading matches for ${_selectedDate.toIso8601String()}');
       _matches = await _api.getMatches(_selectedDate);
+      debugPrint('Loaded ${_matches.length} matches');
       _error = null;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Error loading matches: $e');
+      debugPrint('Stack trace: $stackTrace');
       _error = e.toString();
       _matches = [];
     } finally {

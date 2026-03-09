@@ -1,0 +1,63 @@
+# Build and compiled files
+build/
+.fusecache/
+
+# Dart/Flutter
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.gen.dart
+generated_plugin_registrant.cc
+generated_plugin_registrant.h
+generated_plugins.cmake
+
+# Native builds
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# iOS/macOS
+*.ipa
+*.dSYM.zip
+*.dSYM
+DerivedData/
+Pods/
+*.xcworkspace
+!default.xcworkspace
+xcuserdata/
+
+# Android
+*.apk
+*.aab
+.gradle/
+local.properties
+captures/
+gradle-app.setting
+
+# Web
+lib/generated_plugin_registrant.dart
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

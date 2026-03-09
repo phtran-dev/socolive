@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
-import 'dart:io';
+import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final String streamUrl;
@@ -20,104 +21,100 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late final Player _player;
-  late final VideoController _controller;
-  String? _error;
-  bool _isPlaying = false;
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
   String _status = 'Initializing...';
+  String? _error;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    debugPrint('=== Video Player Screen ===');
-    debugPrint('Stream URL: ${widget.streamUrl}');
-
-    _player = Player();
-    _controller = VideoController(_player);
     _initializePlayer();
   }
 
   Future<void> _initializePlayer() async {
     setState(() {
+      _isLoading = true;
       _status = 'Loading stream...';
       _error = null;
     });
 
     try {
-      await _player.open(
-        Media(widget.streamUrl),
-        play: true,
+      _videoController = VideoPlayerController.networkUrl(Uri.parse(widget.streamUrl));
+
+      await _videoController!.initialize();
+
+      _chewieController = ChewieController(
+        videoPlayerController: _videoController!,
+        autoPlay: true,
+        looping: true,
+        aspectRatio: 16 / 9,
+        placeholder: Container(
+          color: Colors.black,
+          child: const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
+        ),
+        errorBuilder: (context, errorMessage) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Error: $errorMessage',
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        },
       );
 
-      _player.stream.playing.listen((playing) {
-        if (mounted) {
-          setState(() {
-            _isPlaying = playing;
-            _status = playing ? 'Playing (audio only)' : 'Paused';
-          });
-        }
-      });
-
-      _player.stream.error.listen((error) {
-        if (mounted && error != null && error.isNotEmpty) {
-          setState(() {
-            _error = error;
-            _status = 'Error';
-          });
-        }
-      });
-
-      _player.stream.position.listen((position) {
-        if (position.inMilliseconds > 0 && mounted && !_isPlaying) {
-          setState(() {
-            _isPlaying = true;
-            _status = 'Playing (audio only)';
-          });
-        }
-      });
-
       setState(() {
-        _status = 'Stream loaded';
+        _isLoading = false;
+        _status = 'Playing';
       });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _status = 'Error';
-        });
-      }
+      setState(() {
+        _isLoading = false;
+        _status = 'Error';
+        _error = e.toString();
+      });
     }
   }
 
   Future<void> _openInExternalPlayer() async {
-    // Open in mpv
     try {
-      await Process.start('mpv', [
-        '--title=${widget.title}',
-        widget.streamUrl,
-      ]);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Opening in mpv...')),
-        );
+      final uri = Uri.parse(widget.streamUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      // Fallback to VLC
-      try {
-        await Process.start('vlc', [widget.streamUrl]);
-      } catch (e2) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not open external player: $e')),
-          );
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open stream: $e')),
+        );
       }
+    }
+  }
+
+  Future<void> _copyUrl() async {
+    await Clipboard.setData(ClipboardData(text: widget.streamUrl));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Stream URL copied to clipboard')),
+      );
     }
   }
 
   @override
   void dispose() {
-    _player.dispose();
+    _videoController?.dispose();
+    _chewieController?.dispose();
     super.dispose();
   }
 
@@ -126,20 +123,19 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('${widget.title} - ${widget.streamer}'),
+        title: Text(widget.title),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
+            icon: const Icon(Icons.copy),
+            tooltip: 'Copy stream URL',
+            onPressed: _copyUrl,
+          ),
+          IconButton(
             icon: const Icon(Icons.open_in_new),
             tooltip: 'Open in external player',
             onPressed: _openInExternalPlayer,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              _player.open(Media(widget.streamUrl), play: true);
-            },
           ),
         ],
       ),
@@ -148,63 +144,81 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   }
 
   Widget _buildBody() {
-    return Stack(
-      children: [
-        // Video widget (may show blue due to GPU driver issues)
-        Center(
-          child: Video(
-            controller: _controller,
-            controls: MaterialVideoControls,
-          ),
+    if (_isLoading) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: Colors.white),
+            const SizedBox(height: 16),
+            Text(
+              _status,
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ],
         ),
-        // Info overlay
-        Positioned(
-          top: 10,
-          left: 10,
-          right: 10,
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  _status,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
+              const Icon(Icons.error_outline, color: Colors.red, size: 64),
+              const SizedBox(height: 16),
+              const Text(
+                'Failed to load stream',
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.9),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.info, color: Colors.white, size: 16),
-                    SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Blue screen? GPU driver issue. Click 📺 to open in mpv/VLC',
-                        style: TextStyle(color: Colors.white, fontSize: 11),
-                      ),
-                    ),
-                  ],
-                ),
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.white54, fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _openInExternalPlayer,
+                icon: const Icon(Icons.open_in_new),
+                label: const Text('Open in External Player'),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _initializePlayer,
+                child: const Text('Retry'),
               ),
             ],
           ),
         ),
-        // Loading indicator
-        if (!_isPlaying)
-          const Center(
-            child: CircularProgressIndicator(color: Colors.white),
+      );
+    }
+
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: _chewieController != null
+                ? Chewie(controller: _chewieController!)
+                : const Text('No video', style: TextStyle(color: Colors.white)),
           ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(8),
+          color: Colors.grey[900],
+          child: Row(
+            children: [
+              const Icon(Icons.person, color: Colors.white54, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'Streamer: ${widget.streamer}',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

@@ -11,13 +11,12 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.6
   http: ^1.1.0
-  media_kit: ^1.1.10
-  media_kit_video: ^1.2.4
-  media_kit_libs_video: ^1.0.4
   url_launcher: ^6.2.1
   cached_network_image: ^3.3.0
   intl: ^0.18.1
   provider: ^6.1.1
+  video_player: ^2.8.2
+  chewie: ^1.7.4
 
 dev_dependencies:
   flutter_test:
