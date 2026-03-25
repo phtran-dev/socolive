@@ -60,10 +60,19 @@ class Match {
   });
 
   factory Match.fromJson(Map<String, dynamic> json) {
+    // Get categoryId from API or map from categoryName
+    int categoryId = json['categoryId'] is int ? json['categoryId'] : 0;
+    final categoryName = json['categoryName']?.toString() ?? '';
+
+    // If categoryId is 0 or missing, try to map from category name
+    if (categoryId == 0 && categoryName.isNotEmpty) {
+      categoryId = SportCategory.mapCategoryNameToId(categoryName);
+    }
+
     return Match(
       scheduleId: json['scheduleId']?.toString() ?? '',
-      categoryId: json['categoryId'] is int ? json['categoryId'] : 0,
-      categoryName: json['categoryName']?.toString() ?? '',
+      categoryId: categoryId,
+      categoryName: categoryName,
       categoryIcon: json['categoryIcon']?.toString() ?? '',
       subCategoryName: json['subCateName']?.toString() ?? '',
       hostName: json['hostName']?.toString() ?? 'TBD',
@@ -110,6 +119,27 @@ class SportCategory {
     SportCategory(id: 6, name: 'Bóng bàn', icon: '', iconAsset: 'assets/icons/table_tennis.png'),
     SportCategory(id: 7, name: 'Khác', icon: '', iconAsset: 'assets/icons/other.png'),
   ];
+
+  // Map API category names to our category IDs
+  static int mapCategoryNameToId(String? name) {
+    if (name == null || name.isEmpty) return 7; // Default to "Khác"
+
+    final lowerName = name.toLowerCase();
+    if (lowerName.contains('football') || lowerName.contains('soccer') || lowerName.contains('bóng đá')) {
+      return 1;
+    } else if (lowerName.contains('basketball') || lowerName.contains('bóng rổ')) {
+      return 2;
+    } else if (lowerName.contains('tennis') && !lowerName.contains('table')) {
+      return 3;
+    } else if (lowerName.contains('badminton') || lowerName.contains('cầu lông')) {
+      return 4;
+    } else if (lowerName.contains('volleyball') || lowerName.contains('bóng chuyền')) {
+      return 5;
+    } else if (lowerName.contains('table tennis') || lowerName.contains('ping pong') || lowerName.contains('bóng bàn')) {
+      return 6;
+    }
+    return 7; // "Khác" for unknown categories
+  }
 }
 
 // Filter type enum

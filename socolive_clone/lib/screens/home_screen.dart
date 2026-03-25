@@ -5,8 +5,25 @@ import '../controllers/match_controller.dart';
 import '../models/match.dart';
 import 'match_detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final FocusNode _categoryFocusNode = FocusNode();
+  final FocusNode _filterFocusNode = FocusNode();
+  final FocusNode _matchListFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _categoryFocusNode.dispose();
+    _filterFocusNode.dispose();
+    _matchListFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,37 +89,42 @@ class HomeScreen extends StatelessWidget {
               final category = categories[index];
               final isSelected = controller.selectedCategoryId == category.id;
 
-              return GestureDetector(
+              return _TVFocusableItem(
+                autofocus: index == 0,
                 onTap: () => controller.setCategory(category.id),
-                child: Container(
-                  width: 65,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.green[600] : Colors.grey[800],
-                    borderRadius: BorderRadius.circular(12),
-                    border: isSelected
-                        ? Border.all(color: Colors.green[400]!, width: 2)
-                        : null,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildCategoryIcon(category.id, isSelected),
-                      const SizedBox(height: 4),
-                      Text(
-                        category.name,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey[400],
-                          fontSize: 10,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                builder: (context, hasFocus) {
+                  return Container(
+                    width: 65,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.green[600] : Colors.grey[800],
+                      borderRadius: BorderRadius.circular(12),
+                      border: hasFocus
+                          ? Border.all(color: Colors.white, width: 3)
+                          : isSelected
+                              ? Border.all(color: Colors.green[400]!, width: 2)
+                              : null,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildCategoryIcon(category.id, isSelected || hasFocus),
+                        const SizedBox(height: 4),
+                        Text(
+                          category.name,
+                          style: TextStyle(
+                            color: isSelected || hasFocus ? Colors.white : Colors.grey[400],
+                            fontSize: 10,
+                            fontWeight: isSelected || hasFocus ? FontWeight.bold : FontWeight.normal,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
+                      ],
+                    ),
+                  );
+                },
               );
             },
           ),
@@ -156,51 +178,58 @@ class HomeScreen extends StatelessWidget {
             children: MatchFilter.values.map((filter) {
               final isSelected = controller.selectedFilter == filter;
               return Expanded(
-                child: GestureDetector(
+                child: _TVFocusableItem(
                   onTap: () => controller.setFilter(filter),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Colors.green[600] : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected ? Colors.green[600]! : Colors.grey[600]!,
+                  builder: (context, hasFocus) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.green[600] : Colors.transparent,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: hasFocus
+                              ? Colors.white
+                              : isSelected
+                                  ? Colors.green[600]!
+                                  : Colors.grey[600]!,
+                          width: hasFocus ? 2 : 1,
+                        ),
                       ),
-                    ),
-                    child: Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (filter == MatchFilter.live)
-                            Container(
-                              width: 8,
-                              height: 8,
-                              margin: const EdgeInsets.only(right: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (filter == MatchFilter.live)
+                              Container(
+                                width: 8,
+                                height: 8,
+                                margin: const EdgeInsets.only(right: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            if (filter == MatchFilter.hot)
+                              Icon(
+                                Icons.local_fire_department,
+                                color: isSelected || hasFocus ? Colors.white : Colors.orange,
+                                size: 14,
+                              ),
+                            if (filter == MatchFilter.hot)
+                              const SizedBox(width: 2),
+                            Text(
+                              filter.label,
+                              style: TextStyle(
+                                color: isSelected || hasFocus ? Colors.white : Colors.grey[400],
+                                fontSize: 11,
+                                fontWeight: isSelected || hasFocus ? FontWeight.bold : FontWeight.normal,
                               ),
                             ),
-                          if (filter == MatchFilter.hot)
-                            Icon(
-                              Icons.local_fire_department,
-                              color: isSelected ? Colors.white : Colors.orange,
-                              size: 14,
-                            ),
-                          if (filter == MatchFilter.hot)
-                            const SizedBox(width: 2),
-                          Text(
-                            filter.label,
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.grey[400],
-                              fontSize: 11,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               );
             }).toList(),
@@ -361,182 +390,185 @@ class HomeScreen extends StatelessWidget {
     final time = DateTime.fromMillisecondsSinceEpoch(match.matchTime);
     final timeStr = DateFormat.Hm().format(time);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      color: Colors.grey[850],
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: match.isLive
-            ? BorderSide(color: Colors.red, width: 2)
-            : BorderSide.none,
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MatchDetailScreen(match: match),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              // Header with league and status
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.green[900],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        match.subCategoryName.isNotEmpty
-                            ? match.subCategoryName
-                            : match.categoryName,
-                        style: const TextStyle(
-                          color: Colors.greenAccent,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 11,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (match.isLive)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.circle, color: Colors.white, size: 8),
-                          SizedBox(width: 4),
-                          Text(
-                            'LIVE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (match.isHot && !match.isLive)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.orange[900],
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.local_fire_department, color: Colors.orange, size: 12),
-                          const SizedBox(width: 2),
-                          Text(
-                            'HOT',
-                            style: TextStyle(
-                              color: Colors.orange[200],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Teams
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _buildTeamIcon(match.hostIcon),
-                        const SizedBox(height: 6),
-                        Text(
-                          match.hostName,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        timeStr,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'VS',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        _buildTeamIcon(match.guestIcon),
-                        const SizedBox(height: 6),
-                        Text(
-                          match.guestName,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-
-              // Streamers count
-              if (match.anchors.isNotEmpty)
+    return _TVFocusableItem(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MatchDetailScreen(match: match),
+          ),
+        );
+      },
+      builder: (context, hasFocus) {
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          color: hasFocus ? Colors.grey[700] : Colors.grey[850],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: match.isLive
+                ? BorderSide(color: Colors.red, width: 2)
+                : hasFocus
+                    ? BorderSide(color: Colors.white, width: 2)
+                    : BorderSide.none,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                // Header with league and status
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.videocam, size: 14, color: Colors.green[400]),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${match.anchors.length} streamer${match.anchors.length > 1 ? 's' : ''}',
-                      style: TextStyle(color: Colors.green[400], fontSize: 12),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.green[900],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          match.subCategoryName.isNotEmpty
+                              ? match.subCategoryName
+                              : match.categoryName,
+                          style: const TextStyle(
+                            color: Colors.greenAccent,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 11,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if (match.isLive)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.circle, color: Colors.white, size: 8),
+                            SizedBox(width: 4),
+                            Text(
+                              'LIVE',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (match.isHot && !match.isLive)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.orange[900],
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.local_fire_department, color: Colors.orange, size: 12),
+                            const SizedBox(width: 2),
+                            Text(
+                              'HOT',
+                              style: TextStyle(
+                                color: Colors.orange[200],
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Teams
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          _buildTeamIcon(match.hostIcon),
+                          const SizedBox(height: 6),
+                          Text(
+                            match.hostName,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          timeStr,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'VS',
+                          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          _buildTeamIcon(match.guestIcon),
+                          const SizedBox(height: 6),
+                          Text(
+                            match.guestName,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-            ],
+                const SizedBox(height: 8),
+
+                // Streamers count
+                if (match.anchors.isNotEmpty)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.videocam, size: 14, color: Colors.green[400]),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${match.anchors.length} streamer${match.anchors.length > 1 ? 's' : ''}',
+                        style: TextStyle(color: Colors.green[400], fontSize: 12),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -566,6 +598,40 @@ class HomeScreen extends StatelessWidget {
           color: Colors.grey[700],
           child: Icon(Icons.sports_soccer, color: Colors.grey[500], size: 24),
         ),
+      ),
+    );
+  }
+}
+
+/// TV Focusable Item Widget - supports both touch and TV remote navigation
+class _TVFocusableItem extends StatelessWidget {
+  final VoidCallback onTap;
+  final Widget Function(BuildContext context, bool hasFocus) builder;
+  final bool autofocus;
+
+  const _TVFocusableItem({
+    required this.onTap,
+    required this.builder,
+    this.autofocus = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      autofocus: autofocus,
+      actions: {
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (intent) => onTap(),
+        ),
+      },
+      child: Builder(
+        builder: (context) {
+          final hasFocus = Focus.of(context).hasFocus;
+          return GestureDetector(
+            onTap: onTap,
+            child: builder(context, hasFocus),
+          );
+        },
       ),
     );
   }
